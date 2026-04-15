@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>陈家裕 Frank Chen - 个人主页</title>
+    
+    <!-- 引入字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans SC', 'sans-serif'],
+                    },
+                    colors: {
+                        // 定义低饱和度橙色作为品牌高亮色
+                        brand: {
+                            orange: '#D08C60',
+                            light: '#F3E9E2'
+                        }
+                    },
+                    animation: {
+                        'marquee': 'marquee 30s linear infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Lenis (平滑滚动) -->
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* 基础样式 */
+        body {
+            background-color: #FAFAFA;
+            color: #111111;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        /* 装饰性网格背景 */
+        .bg-grid {
+            background-size: 60px 60px;
+            background-image: 
+                linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 装饰性垂直辅助线 */
+        .guide-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(0,0,0,0.04);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Bento Grid 交互 */
+        .bento-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s;
+        }
+        .bento-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -15px rgba(208, 140, 96, 0.15);
+            border-color: rgba(208, 140, 96, 0.3);
+        }
+
+        /* 经历时间轴交互 */
+        .hover-group:hover .hover-item {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+        .hover-group .hover-item:hover {
+            opacity: 1 !important;
+            filter: grayscale(0%);
+            transform: translateX(12px);
+        }
+        .hover-item {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        /* 头像动效 */
+        .avatar-container:hover .avatar-img {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="selection:bg-brand-orange selection:text-white">
+
+    <div id="app" class="relative z-10">
+        <!-- 全局背景网格 -->
+        <div class="bg-grid"></div>
+        <div class="guide-line left-6 md:left-16"></div>
+        <div class="guide-line right-6 md:right-16"></div>
+        <div class="guide-line left-1/2 hidden md:block"></div>
+
+        <!-- 悬浮装饰图案 -->
+        <div class="fixed top-20 right-20 z-0 opacity-20 pointer-events-none animate-spin-slow">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#D08C60" stroke-width="0.5"><path d="M12 2v20M2 12h20"/></svg>
+        </div>
+        <div class="fixed bottom-40 left-10 z-0 opacity-20 pointer-events-none">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="0.5"><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+
+        <!-- Hero 首屏区域 -->
+        <section class="hero-section relative h-screen flex flex-col justify-center px-6 md:px-16 overflow-hidden">
+            <div class="relative z-10 max-w-7xl mx-auto w-full flex flex-col md:flex-row md:items-center justify-between gap-12">
+                
+                <!-- 左侧文字区 -->
+                <div class="flex-1">
+                    <div class="overflow-hidden mb-6 flex items-center gap-4 hero-anim">
+                        <div class="w-12 h-[1px] bg-brand-orange"></div>
+                        <h2 class="text-sm md:text-lg text-brand-orange font-medium tracking-widest uppercase">{{ profile.title }}</h2>
+                    </div>
+                    
+                    <div class="overflow-hidden pb-4 -mb-4 pt-2 -mt-2">
+                        <h1 class="hero-anim text-[16vw] md:text-[11vw] font-black leading-none tracking-tighter text-black uppercase -ml-1 md:-ml-2">
+                            {{ profile.name }}<span class="text-brand-orange">.</span>
+                        </h1>
+                    </div>
+                    
+                    <div class="overflow-hidden mt-10 md:mt-14">
+                        <a :href="'mailto:' + profile.contact.email" class="hero-anim group relative inline-flex items-center justify-center px-8 py-4 bg-black text-white rounded-full overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(208,140,96,0.4)]">
+                            <span class="relative z-10 font-medium tracking-wide flex items-center gap-2">
+                                <span>Get in Touch</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </span>
+                            <div class="absolute inset-0 bg-brand-orange scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-out"></div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 右侧圆形头像区 -->
+                <div class="hero-anim relative hidden md:flex items-center justify-center w-72 h-72 lg:w-96 lg:h-96 shrink-0 avatar-container">
+                    <!-- 头像外部装饰圈 -->
+                    <div class="absolute inset-0 border border-brand-orange opacity-30 rounded-full scale-110 animate-[spin_20s_linear_infinite_reverse] border-dashed"></div>
+                    <div class="absolute inset-0 border-2 border-black opacity-10 rounded-full scale-105"></div>
+                    
+                    <!-- 核心头像图片 -->
+                    <div class="w-full h-full rounded-full overflow-hidden shadow-2xl relative z-10 border-4 border-white bg-gray-100">
+                        <img :src="profile.avatar" alt="Avatar" class="w-full h-full object-cover avatar-img transition-transform duration-700 ease-out">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 向下滚动提示 -->
+            <div class="absolute bottom-10 left-6 md:left-16 hero-anim flex items-center gap-4 text-xs text-gray-500 uppercase tracking-widest font-semibold">
+                <div class="w-6 h-[1px] bg-brand-orange"></div>
+                Scroll to explore
+            </div>
+        </section>
+
+        <!-- About 关于区域 (Bento Grid) -->
+        <section class="py-24 px-6 md:px-16 z-10 relative bento-trigger">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center gap-4 mb-12 section-title">
+                    <i data-lucide="layout-grid" class="text-brand-orange w-8 h-8"></i>
+                    <h3 class="text-3xl md:text-5xl font-bold tracking-tight">About Me</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-auto md:auto-rows-[220px]">
+                    <!-- 大卡片：个人简介 -->
+                    <div class="bento-card bento-item rounded-[2rem] p-8 md:p-10 col-span-1 md:col-span-2 md:row-span-2 flex flex-col justify-between border border-gray-200">
+                        <div>
+                            <i data-lucide="quote" class="text-brand-orange/30 w-12 h-12 mb-6"></i>
+                            <p class="text-lg md:text-xl leading-relaxed text-gray-700 font-light">
+                                {{ profile.summary }}
+                            </p>
+                        </div>
+                        <div class="mt-8 flex items-center gap-4 pt-6 border-t border-gray-100">
+                            <!-- 移动端显示的备用小头像 -->
+                            <div class="w-10 h-10 rounded-full overflow-hidden md:hidden shadow-md">
+                                <img :src="profile.avatar" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 flex items-center gap-2">
+                                    {{ profile.name }}
+                                    <span class="w-2 h-2 rounded-full bg-brand-orange"></span>
+                                </h4>
+                                <p class="text-sm text-gray-500">{{ profile.title }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 小卡片：经验年限 (使用重点色) -->
+                    <div class="bento-card bento-item bg-brand-orange rounded-[2rem] p-8 col-span-1 flex flex-col items-center justify-center text-center text-white relative overflow-hidden group shadow-lg">
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_50%)]"></div>
+                        <!-- 背景装饰线 -->
+                        <svg class="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="stripes" width="8" height="8" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#ffffff" stroke-width="1" /></pattern></defs><rect width="100%" height="100%" fill="url(#stripes)" /></svg>
+                        
+                        <span class="text-7xl font-black mb-2 tracking-tighter relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-md">{{ profile.experience.years }}</span>
+                        <span class="uppercase tracking-widest text-xs font-semibold relative z-10 text-white/90">{{ profile.experience.label }}</span>
+                    </div>
+
+                    <!-- 小卡片：城市/状态 -->
+                    <div class="bento-card bento-item bg-white rounded-[2rem] p-8 col-span-1 flex flex-col justify-center border border-gray-200">
+                        <div class="mb-6">
+                            <div class="flex items-center gap-3 text-gray-800 mb-2">
+                                <div class="w-8 h-8 rounded-full bg-brand-light flex items-center justify-center">
+                                    <i data-lucide="map-pin" class="w-4 h-4 text-brand-orange"></i>
+                                </div>
+                                <span class="font-bold text-lg">{{ profile.location.city }}</span>
+                            </div>
+                            <p class="text-brand-orange text-sm font-medium ml-11">{{ profile.location.status }}</p>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-3 text-gray-800">
+                                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                    <i data-lucide="user" class="w-4 h-4 text-gray-500"></i>
+                                </div>
+                                <span class="font-medium text-lg">{{ profile.age }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 中卡片：核心优势/标签 -->
+                    <div class="bento-card bento-item bg-white rounded-[2rem] p-8 col-span-1 md:col-span-2 border border-gray-200 flex flex-col justify-center relative overflow-hidden">
+                        <div class="absolute right-0 bottom-0 opacity-5 pointer-events-none translate-x-1/4 translate-y-1/4">
+                            <i data-lucide="target" class="w-48 h-48"></i>
+                        </div>
+                        <h4 class="text-sm text-gray-400 uppercase tracking-widest mb-6 font-semibold flex items-center gap-2">
+                            <i data-lucide="zap" class="w-4 h-4 text-brand-orange"></i>
+                            Core Advantages
+                        </h4>
+                        <div class="flex flex-wrap gap-2.5 relative z-10">
+                            <span v-for="(adv, index) in profile.advantages" :key="adv" 
+                                  class="px-4 py-2 border rounded-full text-sm font-medium transition-colors cursor-default"
+                                  :class="index < 3 ? 'bg-brand-light border-brand-orange/30 text-brand-orange' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-400'">
+                                {{ adv }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills 跑马灯区域 -->
+        <section class="py-16 relative overflow-hidden border-y border-gray-200 flex flex-col justify-center bg-white/50 backdrop-blur-sm z-10">
+            <div class="-rotate-1 scale-105">
+                <div class="flex whitespace-nowrap overflow-hidden">
+                    <div class="animate-marquee flex gap-12 items-center" style="width: max-content;">
+                        <!-- 渲染两遍以实现无缝滚动 -->
+                        <template v-for="n in 2" :key="n">
+                            <div class="flex gap-12 items-center mr-12">
+                                <div v-for="skill in profile.skills" :key="n+'-'+skill" class="flex items-center gap-12">
+                                    <span class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500 uppercase tracking-tighter hover:text-brand-orange transition-colors duration-300 cursor-default">
+                                        {{ skill }}
+                                    </span>
+                                    <i data-lucide="asterisk" class="text-brand-orange/40 w-8 h-8 md:w-10 md:h-10 animate-spin-slow"></i>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience 经历区域 -->
+        <section class="py-32 px-6 md:px-16 relative z-10 exp-trigger">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex items-center gap-4 mb-16 section-title">
+                    <i data-lucide="briefcase" class="text-brand-orange w-8 h-8"></i>
+                    <h3 class="text-3xl md:text-5xl font-bold tracking-tight">Experience</h3>
+                </div>
+
+                <!-- 交互容器 group -->
+                <div class="hover-group relative border-l-2 border-gray-200 ml-3 md:ml-4">
+                    <div v-for="(exp, index) in profile.experiences" :key="index" class="hover-item relative pl-10 md:pl-16 py-10 border-b border-gray-100 last:border-0 cursor-pointer exp-item group/item">
+                        
+                        <!-- 时间轴圆点 (使用品牌橙色) -->
+                        <div class="absolute left-[-11px] top-[48px] w-[20px] h-[20px] bg-white border-4 border-brand-orange rounded-full shadow-sm group-hover/item:scale-125 group-hover/item:bg-brand-orange transition-all duration-300"></div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8 items-start">
+                            <!-- 年份 -->
+                            <div class="md:col-span-1 mt-1">
+                                <span class="inline-block px-3 py-1 bg-gray-100 text-gray-500 text-sm font-bold rounded-md tracking-wider group-hover/item:bg-brand-light group-hover/item:text-brand-orange transition-colors">
+                                    {{ exp.period }}
+                                </span>
+                            </div>
+                            <!-- 内容 -->
+                            <div class="md:col-span-3">
+                                <h4 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{{ exp.role }}</h4>
+                                <h5 class="text-lg text-brand-orange font-semibold mb-6 flex items-center gap-2">
+                                    {{ exp.company }}
+                                </h5>
+                                <ul class="space-y-3">
+                                    <li v-for="(desc, dIndex) in exp.descriptions" :key="dIndex" class="text-gray-600 leading-relaxed text-sm md:text-base flex items-start">
+                                        <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-orange/50 mr-3 mt-1 shrink-0"></i>
+                                        {{ desc }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Education 简单展示 -->
+        <section class="py-16 px-6 md:px-16 relative z-10">
+            <div class="max-w-5xl mx-auto border-t border-gray-200 pt-16">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="graduation-cap" class="text-gray-400 w-5 h-5"></i>
+                    <h3 class="text-sm uppercase tracking-widest text-gray-500 font-bold">Education</h3>
+                </div>
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-8 bg-white border border-gray-200 rounded-3xl hover:border-brand-orange/30 transition-colors shadow-sm">
+                    <div>
+                        <h4 class="text-xl font-bold text-gray-900">{{ profile.education.school }}</h4>
+                        <p class="text-gray-600 mt-1 flex items-center gap-2">
+                            <span>{{ profile.education.major }}</span>
+                            <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                            <span class="text-brand-orange font-medium">{{ profile.education.degree }}</span>
+                        </p>
+                    </div>
+                    <div class="text-gray-400 font-medium px-4 py-2 bg-gray-50 rounded-lg text-sm border border-gray-100">
+                        {{ profile.education.period }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer 联系区域 -->
+        <footer id="contact" class="min-h-[60vh] bg-[#111] text-white px-6 md:px-16 py-20 flex flex-col justify-between relative overflow-hidden mt-20 z-10 rounded-t-[3rem] md:rounded-t-[5rem]">
+            <!-- Footer 背景装饰图案 -->
+            <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#D08C60 1px, transparent 1px); background-size: 30px 30px;"></div>
+            <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-orange rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+            
+            <div class="max-w-7xl mx-auto w-full relative z-10 flex-grow flex flex-col justify-center mt-10">
+                <p class="text-brand-orange uppercase tracking-widest text-sm font-bold mb-6 flex items-center gap-3">
+                    <span class="w-8 h-[2px] bg-brand-orange"></span>
+                    Ready to collaborate?
+                </p>
+                <a :href="'mailto:' + profile.contact.email" class="text-[12vw] md:text-[9vw] font-black leading-none tracking-tighter hover:text-brand-orange transition-colors duration-300 inline-block mb-12 origin-left hover:scale-105">
+                    LET'S TALK.
+                </a>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 border-t border-gray-800 pt-12 mt-auto">
+                    <div class="group">
+                        <p class="text-gray-500 text-sm mb-3 uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="mail" class="w-4 h-4 group-hover:text-brand-orange transition-colors"></i> Email
+                        </p>
+                        <a :href="'mailto:' + profile.contact.email" class="text-lg text-gray-200 hover:text-white transition-colors">{{ profile.contact.email }}</a>
+                    </div>
+                    <div class="group">
+                        <p class="text-gray-500 text-sm mb-3 uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="phone" class="w-4 h-4 group-hover:text-brand-orange transition-colors"></i> Phone
+                        </p>
+                        <p class="text-lg text-gray-200">{{ profile.contact.phone }}</p>
+                    </div>
+                    <div class="group">
+                        <p class="text-gray-500 text-sm mb-3 uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="message-circle" class="w-4 h-4 group-hover:text-brand-orange transition-colors"></i> WeChat
+                        </p>
+                        <p class="text-lg text-gray-200">{{ profile.contact.wechat }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="max-w-7xl mx-auto w-full mt-24 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600 border-t border-gray-800 pt-8 relative z-10">
+                <p>&copy; {{ new Date().getFullYear() }} {{ profile.enName }}. All rights reserved.</p>
+                <p class="mt-2 md:mt-0 flex items-center gap-1">
+                    Designed with <i data-lucide="heart" class="w-3 h-3 text-brand-orange fill-brand-orange"></i> and precision.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // =====================================================================
+        // 配置中心：在这里修改数据。
+        // 注：avatar 字段可以替换为你自己的真实头像图片链接 (如图床链接或相对路径)
+        // =====================================================================
+        const profileData = {
+            name: "陈家裕",
+            enName: "FRANK CHEN",
+            title: "HR副总监",
+            // 这是一个高质量的职场人士占位图，你可以替换成自己真实的图片URL
+            avatar: "https://frankc-image.oss-cn-beijing.aliyuncs.com/%E5%A4%B4%E5%83%8F-%E5%B0%8F.png",
+            summary: "具备丰富的零售行业实战经验及多行业人力资源管理经验。擅长全流程大型活动统筹、内容创作及多媒体制作。拥有优秀的数据分析、文案撰写与跨部门沟通能力，致力于通过创新培训与营销策略驱动业务增长。",
+            age: "47岁",
+            location: {
+                city: "广州 - 海珠区",
+                status: "离职 - 短期内可以到岗"
+            },
+            contact: {
+                phone: "13825135297",
+                email: "gz_frankie@163.com",
+                wechat: "ffrankc"
+            },
+            experience: {
+                years: "20+",
+                label: "Years Experience"
+            },
+            advantages: [
+                "零售终端运营", "多行业HR管理", "大型活动统筹", "新媒体宣传推广", 
+                "E-learning平台搭建", "数据统计分析", "优质文案撰写", "客户服务意识"
+            ],
+            skills: [
+                "培训体系搭建", "E-learning平台", "活动策划落地", "团队管理", 
+                "数据分析", "课程开发", "Photoshop", "Illustrator", 
+                "多媒体制作", "剪映"
+            ],
+            education: {
+                school: "华南农业大学",
+                major: "建筑工程",
+                degree: "本科",
+                period: "1997.09 ~ 2001.07"
+            },
+            experiences: [
+                {
+                    period: "2015.08 - 2025.08",
+                    role: "人力资源副总监",
+                    company: "正佳企业集团有限公司",
+                    descriptions: [
+                        "统筹集团及各公司高管人才盘点，输出能力现状分析报告，为决策提供数据支撑。",
+                        "落地高管及管理层专项培训，组建内训师队伍，沉淀各公司岗位核心课程，产出优质内容并推广。",
+                        "作为会务统筹人，全面负责年度表彰大会的组织工作，保障大型活动顺利落地。",
+                        "牵头搭建E-learning移动学习平台，统筹课程开发与运营，支持业务部门灵活学习。",
+                        "拓展多维度招聘渠道（内推、校企、直播等），提升响应效率。"
+                    ]
+                },
+                {
+                    period: "2014.02 - 2015.08",
+                    role: "培训经理",
+                    company: "侨鑫地产",
+                    descriptions: [
+                        "组建公司内训师队伍，主导课程开发与授课工作。",
+                        "主导“新任经理人”培训项目，覆盖40+名新晋管理者，提升团队效能。",
+                        "开发管理类和房地产专业类课程，统筹10+场员工团建拓展活动（满意度99%）。"
+                    ]
+                },
+                {
+                    period: "2010.06 - 2013.07",
+                    role: "高级培训主管",
+                    company: "安利(中国)日用品有限公司",
+                    descriptions: [
+                        "搭建业务员工培训体系，设计标准化学习路线图，统筹E-learning课程开发。",
+                        "负责新入职员工培训项目，提升岗位适配速度。",
+                        "统筹内部网站内容管理，打造社区化学习平台；负责年度全国业务年会的组织与统筹。"
+                    ]
+                },
+                {
+                    period: "2009.03 - 2010.04",
+                    role: "培训主管",
+                    company: "深圳骏汇服装有限公司广州分公司(G2000)",
+                    descriptions: [
+                        "搭建零售店铺标准化培训体系，主导音视频多媒体课件制作。",
+                        "全程跟进神秘顾客项目，开展专项整改；统筹产品介绍会执行。"
+                    ]
+                },
+                {
+                    period: "2006.03 - 2009.03",
+                    role: "培训主管",
+                    company: "广州屈臣氏个人用品有限公司",
+                    descriptions: [
+                        "制定华南区年度培训计划与预算，落地“营运菁英成长计划”，培养人才200+名（留存率85%）。",
+                        "落地“零售学院”项目，覆盖2000+员工；组织实施区域大型会议与活动。"
+                    ]
+                },
+                {
+                    period: "2001.09 - 2004.03",
+                    role: "店铺经理",
+                    company: "广东赛壹便利店有限公司(7-Eleven)",
+                    descriptions: [
+                        "协助统筹区域内店铺运营管理，负责门店服务标准落地、运营流程优化与团队管理。"
+                    ]
+                }
+            ]
+        };
+
+        // =====================================================================
+        // Vue 3 初始化与逻辑
+        // =====================================================================
+        const { createApp, onMounted, nextTick } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    profile: profileData
+                }
+            },
+            mounted() {
+                // 初始化 Lucide 图标
+                lucide.createIcons();
+
+                nextTick(() => {
+                    this.initAnimations();
+                });
+            },
+            methods: {
+                initAnimations() {
+                    // 1. 初始化 Lenis 平滑滚动
+                    const lenis = new Lenis({
+                        duration: 1.2,
+                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                        orientation: 'vertical',
+                        gestureOrientation: 'vertical',
+                        smoothWheel: true,
+                    });
+
+                    lenis.on('scroll', ScrollTrigger.update);
+
+                    gsap.ticker.add((time) => {
+                        lenis.raf(time * 1000);
+                    });
+                    gsap.ticker.lagSmoothing(0, 0);
+
+                    // 注册 GSAP ScrollTrigger
+                    gsap.registerPlugin(ScrollTrigger);
+
+                    // 2. Hero 区域入场动画
+                    const heroTl = gsap.timeline();
+                    heroTl.from('.hero-anim', {
+                        y: 80,
+                        opacity: 0,
+                        duration: 1.2,
+                        stagger: 0.15,
+                        ease: "power4.out",
+                        delay: 0.2
+                    });
+
+                    // 头像出现动效
+                    gsap.from('.avatar-container', {
+                        scale: 0.8,
+                        opacity: 0,
+                        rotation: -10,
+                        duration: 1.5,
+                        ease: "elastic.out(1, 0.7)",
+                        delay: 0.5
+                    });
+
+                    // 3. 视差滚动效果 (Hero区)
+                    gsap.to('.hero-section h1, .hero-section h2', {
+                        yPercent: 30,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: ".hero-section",
+                            start: "top top",
+                            end: "bottom top",
+                            scrub: true
+                        }
+                    });
+
+                    // 4. Bento Grid 卡片浮现
+                    gsap.from('.bento-item', {
+                        y: 80,
+                        opacity: 0,
+                        duration: 1,
+                        stagger: 0.1,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: ".bento-trigger",
+                            start: "top 80%",
+                        }
+                    });
+                    
+                    // Section Title 动画
+                    gsap.utils.toArray('.section-title').forEach(title => {
+                        gsap.from(title, {
+                            x: -30,
+                            opacity: 0,
+                            duration: 1,
+                            ease: "power3.out",
+                            scrollTrigger: {
+                                trigger: title,
+                                start: "top 85%",
+                            }
+                        })
+                    });
+
+                    // 5. 经历时间轴依次展现
+                    gsap.from('.exp-item', {
+                        y: 40,
+                        opacity: 0,
+                        duration: 0.8,
+                        stagger: 0.15,
+                        ease: "power2.out",
+                        scrollTrigger: {
+                            trigger: ".exp-trigger",
+                            start: "top 75%",
+                        }
+                    });
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
