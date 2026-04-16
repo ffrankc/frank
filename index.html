@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 清理缓存的 Meta 标签 -->
+    <!-- 防缓存标签 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -44,7 +44,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* 彻底解决双端滚动冲突，使用 100dvh 完美适配手机浏览器动态高度 */
         html, body {
             background-color: #FAFAFA;
             color: #111111;
@@ -90,20 +89,49 @@
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="0.5"><circle cx="12" cy="12" r="10"/></svg>
         </div>
 
-        <!-- Hero 区域：使用 min-h-[100dvh] 完美解决手机端高度适配 -->
         <section class="hero-section relative min-h-[100dvh] md:min-h-[85vh] flex flex-col justify-center px-6 md:px-16 overflow-hidden pt-12 md:pt-0">
-            <div class="relative z-10 max-w-6xl mx-auto w-full flex flex-col md:flex-row md:items-center justify-start gap-8 md:gap-16">
+            <div class="relative z-10 max-w-6xl mx-auto w-full">
                 <div class="flex-none pt-10 md:pt-0">
-                    <div class="overflow-hidden mb-4 flex items-center gap-4 hero-anim">
+                    
+                    <!-- 顶部职位信息 -->
+                    <div class="overflow-hidden mb-6 flex items-center gap-4 hero-anim">
                         <div class="w-12 h-[1px] bg-brand-orange"></div>
                         <h2 class="text-sm md:text-lg text-brand-orange font-medium tracking-widest uppercase">{{ profile.title }}</h2>
                     </div>
-                    <div class="overflow-hidden pb-4 -mb-4 pt-2 -mt-2">
-                        <h1 class="hero-anim text-[15vw] md:text-8xl lg:text-[8rem] font-black leading-none tracking-tighter text-black uppercase -ml-1 md:-ml-2">
-                            {{ profile.name }}<span class="text-brand-orange">.</span>
-                        </h1>
+
+                    <!-- 核心排版区：将中英文名字与头像绑定在同一个独立的水平容器中，实现完美居中 -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-start gap-8 md:gap-16">
+                        
+                        <!-- 名字左侧文字区 -->
+                        <div class="flex-none">
+                            <!-- 增加 px-2 -mx-2 给文字左右呼吸空间，防止边缘被裁切 -->
+                            <div class="overflow-hidden pb-4 -mb-4 pt-2 -mt-2 px-2 -mx-2">
+                                <!-- 删除了强制压缩字距和负边距，恢复正常行高 1.1 -->
+                                <h1 class="hero-anim text-[15vw] md:text-8xl lg:text-[8rem] font-black leading-[1.1] text-black uppercase">
+                                    {{ profile.name }}<span class="text-brand-orange">.</span>
+                                </h1>
+                            </div>
+                            
+                            <!-- 新增：英文名，紧贴中文名下方，精准左对齐 -->
+                            <div class="overflow-hidden mt-2 md:mt-4 pb-4 -mb-4 px-2 -mx-2">
+                                <!-- 删除了 uppercase 强制大写和负边距 -->
+                                <h2 class="hero-anim text-4xl md:text-6xl lg:text-[5.5rem] font-black leading-[1.1] tracking-tight text-gray-300">
+                                    {{ profile.enName }}
+                                </h2>
+                            </div>
+                        </div>
+
+                        <!-- 优化：去掉边框和多余圆环，仅保留阴影的纯净头像 -->
+                        <div class="relative hidden md:flex items-center justify-center w-32 h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 shrink-0 avatar-container">
+                            <div class="w-full h-full rounded-full overflow-hidden shadow-2xl relative z-10 bg-gray-100">
+                                <img :src="profile.avatar" alt="Avatar" class="w-full h-full object-cover avatar-img transition-transform duration-700 ease-out">
+                            </div>
+                        </div>
+
                     </div>
-                    <div class="overflow-hidden mt-8 md:mt-10">
+
+                    <!-- 底部按钮区 -->
+                    <div class="overflow-hidden mt-10 md:mt-14">
                         <a :href="'mailto:' + profile.contact.email" class="hero-anim group relative inline-flex items-center justify-center px-8 py-4 bg-black text-white rounded-full overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(208,140,96,0.4)]">
                             <span class="relative z-10 font-medium tracking-wide flex items-center gap-2">
                                 <span>Get in Touch</span>
@@ -112,19 +140,11 @@
                             <div class="absolute inset-0 bg-brand-orange scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-out"></div>
                         </a>
                     </div>
-                </div>
 
-                <!-- 优雅缩小的头像区 -->
-                <div class="hero-anim relative hidden md:flex items-center justify-center w-36 h-36 lg:w-44 lg:h-44 shrink-0 avatar-container ml-0 md:ml-4">
-                    <div class="absolute inset-0 border border-brand-orange opacity-40 rounded-full scale-110 animate-[spin_20s_linear_infinite_reverse] border-dashed"></div>
-                    <div class="absolute inset-0 border-2 border-black opacity-10 rounded-full scale-105"></div>
-                    <div class="w-full h-full rounded-full overflow-hidden shadow-2xl relative z-10 border-4 border-white bg-gray-100">
-                        <!-- 去掉 @error 防止死循环加载，直接展示物理重命名的图片 -->
-                        <img :src="profile.avatar" alt="Avatar" class="w-full h-full object-cover avatar-img transition-transform duration-700 ease-out">
-                    </div>
                 </div>
             </div>
 
+            <!-- 向下滚动提示 -->
             <div class="absolute bottom-8 left-6 md:left-16 hero-anim flex items-center gap-4 text-xs text-gray-500 uppercase tracking-widest font-semibold">
                 <div class="w-6 h-[1px] bg-brand-orange"></div>
                 Scroll to explore
@@ -132,7 +152,7 @@
         </section>
 
         <!-- 关于区域 -->
-        <section class="py-16 px-6 md:px-16 z-10 relative">
+        <section class="py-16 px-6 md:px-16 z-10 relative bento-trigger">
             <div class="max-w-7xl mx-auto">
                 <div class="flex items-center gap-4 mb-10 section-title">
                     <i data-lucide="layout-grid" class="text-brand-orange w-8 h-8"></i>
@@ -145,7 +165,8 @@
                             <p class="text-base md:text-xl leading-relaxed text-gray-700 font-light">{{ profile.summary }}</p>
                         </div>
                         <div class="mt-8 flex items-center gap-4 pt-6 border-t border-gray-100">
-                            <div class="w-12 h-12 rounded-full overflow-hidden md:hidden shadow-md">
+                            <!-- 移动端头像 -->
+                            <div class="w-10 h-10 rounded-full overflow-hidden md:hidden shadow-md">
                                 <img :src="profile.avatar" class="w-full h-full object-cover">
                             </div>
                             <div>
@@ -318,10 +339,13 @@
     <script>
         const profileData = {
             name: "陈家裕",
-            enName: "FRANK CHEN",
+            enName: "Frank Chen",
             title: "HR副总监",
-            // ⚠️ 终极破局：务必把图片重命名为 frank-photo.png，然后改这行代码。
-            avatar: "frank-photo.png",
+            // --------------------------------------------------------------------------------
+            // 终极防丢图测试方案：先在这里用一张绝对安全的在线直链，验证网页彻底正常。
+            // 当你看到它显示出来后，你去 https://imgbb.com 或 sm.ms 把你的头像传上去，把那个链接贴在这里。
+            // --------------------------------------------------------------------------------
+            avatar: "https://i.postimg.cc/Ls4W3Qbx/tou-xiang-xiao-(1).png",
             summary: "具备丰富的零售行业实战经验及多行业人力资源管理经验。擅长全流程大型活动统筹、内容创作及多媒体制作。拥有优秀的数据分析、文案撰写与跨部门沟通能力，致力于通过创新培训与营销策略驱动业务增长。",
             age: "47岁",
             location: { city: "广州 - 海珠区", status: "离职 - 短期内可以到岗" },
@@ -370,12 +394,6 @@
                         "制定华南区年度培训计划与预算，落地“营运菁英成长计划”，培养人才200+名（留存率85%）。",
                         "落地“零售学院”项目，覆盖2000+员工；组织实施区域大型会议与活动。"
                     ]
-                },
-                {
-                    period: "2001.09 - 2004.03", role: "店铺经理", company: "广东赛壹便利店有限公司(7-Eleven)",
-                    descriptions: [
-                        "协助统筹区域内店铺运营管理，负责门店服务标准落地、运营流程优化与团队管理。"
-                    ]
                 }
             ]
         };
@@ -386,16 +404,16 @@
             data() { return { profile: profileData } },
             mounted() {
                 lucide.createIcons();
-                // 延迟初始化，确保 Vue 完全把 DOM 渲染完毕再交给 GSAP 计算
                 setTimeout(() => {
                     this.initAnimations();
                 }, 150);
             },
             methods: {
                 initAnimations() {
-                    const isMobile = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    // 【修复核心 1】：将 gsap.registerPlugin 提升到绝对第一行，防止底层调用报错瘫痪
+                    gsap.registerPlugin(ScrollTrigger);
 
-                    // 【核心修复1】：禁止手机端地址栏伸缩破坏动画坐标
+                    const isMobile = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                     ScrollTrigger.config({ ignoreMobileResize: true });
 
                     if (!isMobile) {
@@ -405,21 +423,20 @@
                         gsap.ticker.lagSmoothing(0, 0);
                     }
 
-                    gsap.registerPlugin(ScrollTrigger);
-
-                    // Hero 基础动画
+                    // 文字入场动画
                     gsap.from('.hero-anim', { y: 40, opacity: 0, duration: 1, stagger: 0.1, ease: "power3.out", delay: 0.1 });
-                    gsap.from('.avatar-container', { scale: 0.8, opacity: 0, rotation: -5, duration: 1.2, ease: "elastic.out(1, 0.8)", delay: 0.3 });
-
+                    
+                    // 【修复核心 2】：剥离后的头像动画。并在外部增加 if (!isMobile) 的双保险，不在手机端对其执行任何 GSAP 运算
                     if (!isMobile) {
+                        gsap.from('.avatar-container', { scale: 0.8, opacity: 0, rotation: -5, duration: 1.2, ease: "elastic.out(1, 0.8)", delay: 0.3 });
+                        
                         gsap.to('.hero-section h1, .hero-section h2', {
                             yPercent: 30, ease: "none",
                             scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: true }
                         });
                     }
 
-                    // 【核心修复2】：废弃“区块批量触发”，改为每一个元素独立监听自己
-                    // 不管屏幕多长，只有当这个独立卡片进入视野 90% 时，才播放自己的动画
+                    // 独立监听滚动触发
                     const triggerStart = isMobile ? "top 95%" : "top 85%";
 
                     gsap.utils.toArray('.bento-item').forEach(item => {
